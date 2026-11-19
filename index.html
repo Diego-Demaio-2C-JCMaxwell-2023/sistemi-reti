@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetExplained | Il funzionamento del Web</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a class="logo" href="index.html">NetExplained</a>
+
+            <button id="menuBtn" class="menu-btn" aria-label="Apri menu">
+                ☰
+            </button>
+
+            <ul id="navLinks" class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="teoria.html">1. Teoria</a></li>
+                <li><a href="laboratorio.html">2. Laboratorio</a></li>
+                <li><a href="studio.html">3. Studio</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <h1>Come viaggiano le informazioni su Internet?</h1>
+
+            <p>
+                Ogni volta che inserisci un indirizzo nel browser inizia
+                un processo di comunicazione tra il tuo dispositivo e
+                i server. Scopri come funzionano i protocolli del livello
+                applicativo attraverso lo stack TCP/IP.
+            </p>
+
+            <a class="btn" href="teoria.html">
+                Scopri la teoria →
+            </a>
+        </section>
+
+        <section class="grid">
+
+            <article class="card">
+                <h2>1. Sezione teorica</h2>
+
+                <p>
+                    Approfondisci il modello Client-Server, la struttura
+                    dello stack TCP/IP, il sistema DNS, i protocolli
+                    HTTP e HTTPS e il funzionamento della posta
+                    elettronica tramite SMTP e IMAP.
+                </p>
+
+                <a href="teoria.html" class="btn">
+                    Accedi alla teoria
+                </a>
+            </article>
+
+            <article class="card">
+                <h2>2. Esperienza di laboratorio</h2>
+
+                <p>
+                    Esplora il trasferimento dei pacchetti attraverso
+                    la rete e sperimenta la creazione di richieste HTTP
+                    per capire come un server elabora e restituisce
+                    le informazioni.
+                </p>
+
+                <a href="laboratorio.html" class="btn">
+                    Entra nel laboratorio
+                </a>
+            </article>
+
+            <article class="card">
+                <h2>3. Spazio di apprendimento</h2>
+
+                <p>
+                    Verifica le conoscenze acquisite utilizzando
+                    flashcard, quiz interattivi con correzione
+                    delle risposte e un glossario dedicato ai
+                    principali termini informatici.
+                </p>
+
+                <a href="studio.html" class="btn">
+                    Inizia a esercitarti
+                </a>
+            </article>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>
+            Progetto didattico realizzato da
+            <strong>DE MAIO MINELLI BELTRAME</strong>
+            – Pubblicato su GitHub Pages.
+        </p>
+    </footer>
+
+    <script>
+        const menuButton = document.querySelector("#menuBtn");
+        const navigation = document.querySelector("#navLinks");
+
+        menuButton.addEventListener("click", function () {
+            navigation.classList.toggle("open");
+        });
+    </script>
+
+</body>
+</html>
