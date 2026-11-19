@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3. Area Studio – Come funziona il Web</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --card-radius: 10px;
+      --box-radius: 8px;
+      --surface-soft: #f8fafc;
+    }
+
+    .study-block {
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-neutral {
+      background-color: #475569;
+    }
+
+    .btn-neutral:hover {
+      background-color: #334155;
+    }
+
+    /* Griglia Flashcard 3D */
+    .flip-deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.1rem;
+      margin-top: 1.1rem;
+    }
+
+    .flip-tile {
+      height: 170px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flip-body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-tile.is-turned .flip-body {
+      transform: rotateY(180deg);
+    }
+
+    .tile-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: var(--card-radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .face-front {
+      background-color: #eff6ff;
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .face-hint {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.55rem;
+    }
+
+    .face-back {
+      background-color: var(--primary);
+      color: #ffffff;
+      transform: rotateY(180deg);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    /* Sezione Quiz */
+    .question-row {
+      border-bottom: 1px solid var(--border);
+      padding: 1.1rem 0;
+    }
+
+    .question-row:last-of-type {
+      border-bottom: none;
+    }
+
+    .choices-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .choice-label {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: var(--surface-soft);
+      transition: background-color 0.2s ease;
+    }
+
+    .choice-label:hover {
+      background-color: #f1f5f9;
+    }
+
+    .answer-note {
+      margin-top: 0.6rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .answer-note.is-valid {
+      display: block;
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+    }
+
+    .answer-note.is-invalid {
+      display: block;
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .quiz-actions {
+      margin-top: 1.1rem;
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .result-box {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border-radius: var(--box-radius);
+      background-color: #dbeafe;
+      color: #1e3a8a;
+      font-weight: 700;
+      display: none;
+    }
+
+    /* Glossario */
+    .filter-box {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--box-radius);
+      font-size: 1rem;
+      margin: 1rem 0;
+    }
+
+    .dict-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .dict-entry {
+      background-color: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--box-radius);
+      padding: 0.95rem;
+    }
+
+    .dict-entry strong {
+      color: var(--primary-dark);
+    }
+
+    .dict-entry p {
+      font-size: 0.9rem;
+      margin-top: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo">NetExplained</a>
+      <button class="menu-btn" id="burgerToggle" aria-label="Apri menu">☰</button>
+      <ul class="nav-links" id="mainMenu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="teoria.html">1. Teoria</a></li>
+        <li><a href="laboratorio.html">2. Laboratorio</a></li>
+        <li><a href="studio.html" class="active">3. Studio</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>3. Area Studio e Verifica</h1>
+      <p>Ripassa con le flashcard, metti alla prova le tue conoscenze con il quiz e consulta il glossario.</p>
+    </section>
+
+    <!-- 1. FLASHCARD -->
+    <article class="card study-block">
+      <h2>3.1 Flashcard di ripasso</h2>
+      <p>Clicca su una carta per girarla e scoprire la definizione.</p>
+      <div class="flip-deck" id="deckContainer"></div>
+    </article>
+
+    <!-- 2. QUIZ -->
+    <article class="card study-block">
+      <h2>3.2 Quiz di autovalutazione</h2>
+      <p>Rispondi alle 8 domande e premi <strong>"Verifica risposte"</strong> per vedere il tuo punteggio e le spiegazioni.</p>
+      <div id="examWrapper"></div>
+      <div class="quiz-actions">
+        <button class="btn" id="btnSubmitExam" style="margin-top:0;">Verifica risposte</button>
+        <button class="btn btn-neutral" id="btnResetExam" style="margin-top:0;">Ricomincia quiz</button>
+      </div>
+      <div class="result-box" id="examSummary"></div>
+    </article>
+
+    <!-- 3. GLOSSARIO -->
+    <article class="card study-block">
+      <h2>3.3 Glossario rapido</h2>
+      <p>Cerca un termine tecnico per visualizzare subito il suo significato:</p>
+      <input type="text" id="termFilter" class="filter-box" placeholder="Scrivi un termine (es. DNS, TLS, Server, IP, IMAP)...">
+      <div class="dict-grid" id="dictContainer"></div>
+    </article>
+
+    <div>
+      <a href="laboratorio.html" class="btn btn-neutral">← Torna al Laboratorio</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>Progetto didattico realizzato da <strong>DE MAIO MINELLI BELTRAME</strong> – Pubblicato su GitHub Pages.</p>
+  </footer>
+
+  <script>
+    // Navigazione mobile
+    const burgerBtn = document.getElementById('burgerToggle');
+    const navList = document.getElementById('mainMenu');
+    burgerBtn.addEventListener('click', () => navList.classList.toggle('open'));
+
+    // --- 1. GESTIONE FLASHCARD ---
+    const deckItems = [
+      { term: "Modello Client-Server", definition: "Architettura in cui un Client (es. browser) richiede servizi o risorse a un Server sempre attivo in rete." },
+      { term: "A cosa serve il DNS?", definition: "Traduce i nomi di dominio leggibili dall'uomo (es. www.esempio.it) in indirizzi IP numerici." },
+      { term: "Cosa significa HTTP?", definition: "HyperText Transfer Protocol: il protocollo del livello applicativo usato per trasferire pagine web." },
+      { term: "Differenza tra GET e POST", definition: "GET chiede e legge una risorsa dal server; POST invia dati al server (es. moduli di registrazione)." },
+      { term: "Errore 404 Not Found", definition: "Codice di stato HTTP che indica che la pagina richiesta non esiste sul server." },
+      { term: "Ruolo di TLS in HTTPS", definition: "Transport Layer Security: cifra i dati scambiati tra browser e server e verifica l'identità del sito." },
+      { term: "A cosa serve SMTP?", definition: "Simple Mail Transfer Protocol: protocollo usato per inviare e inoltrare le email tra client e server." },
+      { term: "Differenza tra IMAP e SMTP", definition: "SMTP serve per inviare la posta; IMAP serve per leggere e sincronizzare le email su più dispositivi." }
+    ];
+
+    function buildFlashcards() {
+      const container = document.getElementById('deckContainer');
+      const fragment = document.createDocumentFragment();
+
+      for (const entry of deckItems) {
+        const tile = document.createElement('div');
+        tile.className = 'flip-tile';
+        tile.innerHTML = `
+          <div class="flip-body">
+            <div class="tile-face face-front">
+              <span>${entry.term}</span>
+              <span class="face-hint">Clicca per girare</span>
+            </div>
+            <div class="tile-face face-back">
+              <span>${entry.definition}</span>
+            </div>
+          </div>
+        `;
+        tile.addEventListener('click', () => tile.classList.toggle('is-turned'));
+        fragment.appendChild(tile);
+      }
+      container.appendChild(fragment);
+    }
+
+    // --- 2. GESTIONE QUIZ ---
+    const questionsBank = [
+      {
+        prompt: "1. In quale livello dello stack TCP/IP operano HTTP, DNS e SMTP?",
+        choices: ["Livello Internet", "Livello Trasporto", "Livello Applicazione", "Livello Accesso alla Rete"],
+        correctIndex: 2,
+        note: "HTTP, DNS, HTTPS, SMTP e IMAP operano tutti nel Livello Applicazione, quello più vicino ai programmi dell'utente."
+      },
+      {
+        prompt: "2. Qual è il primo passaggio che avviene quando digiti un nome di dominio nuovo nel browser?",
+        choices: ["Il server invia subito il file HTML", "Viene effettuata una risoluzione DNS per trovare l'indirizzo IP", "Si attiva il protocollo SMTP", "Il browser cancella la cronologia"],
+        correctIndex: 1,
+        note: "Senza l'indirizzo IP restituito dal DNS, il browser non sa a quale computer in rete inviare la richiesta."
+      },
+      {
+        prompt: "3. Che cosa indica il codice di stato HTTP 200 OK?",
+        choices: ["Pagina non trovata", "Errore interno del server", "Richiesta andata a buon fine", "Accesso negato"],
+        correctIndex: 2,
+        note: "200 OK è la risposta standard che conferma che il server ha elaborato correttamente la richiesta."
+      },
+      {
+        prompt: "4. Quale protocollo garantisce che i dati su un sito HTTPS siano cifrati?",
+        choices: ["TLS (Transport Layer Security)", "FTP (File Transfer Protocol)", "POP3", "HTML5"],
+        correctIndex: 0,
+        note: "HTTPS utilizza TLS per cifrare la comunicazione ed evitare che terzi possano intercettare password o dati."
+      },
+      {
+        prompt: "5. Quale metodo HTTP si usa solitamente per inviare i dati di un modulo di contatto?",
+        choices: ["GET", "POST", "DNS", "PING"],
+        correctIndex: 1,
+        note: "POST invia dati nel corpo della richiesta HTTP per farli elaborare o salvare dal server."
+      },
+      {
+        prompt: "6. Cosa significa ricevere un errore 403 Forbidden?",
+        choices: ["Il server è spento", "La pagina non esiste", "Non hai i permessi per accedere alla risorsa", "La connessione Wi-Fi è assente"],
+        correctIndex: 2,
+        note: "403 Forbidden indica che il server ha compreso la richiesta ma rifiuta di autorizzarla."
+      },
+      {
+        prompt: "7. Quale protocollo viene utilizzato per spedire un'email verso il server di posta?",
+        choices: ["HTTP", "IMAP", "SMTP", "DNS"],
+        correctIndex: 2,
+        note: "SMTP (Simple Mail Transfer Protocol) gestisce l'invio e l'inoltro dei messaggi di posta elettronica."
+      },
+      {
+        prompt: "8. Nell'URL 'https://www.scuola.it/orari.html', qual è il percorso della risorsa?",
+        choices: ["https://", "www.scuola.it", "/orari.html", "scuola.it"],
+        correctIndex: 2,
+        note: "'/orari.html' è il path (percorso) che indica al server quale file specifico restituire."
+      }
+    ];
+
+    function buildQuiz() {
+      const wrapper = document.getElementById('examWrapper');
+      const fragment = document.createDocumentFragment();
+
+      questionsBank.forEach((qObj, qIdx) => {
+        const row = document.createElement('div');
+        row.className = 'question-row';
+
+        let optionsMarkup = '';
+        qObj.choices.forEach((choiceText, cIdx) => {
+          optionsMarkup += `
+            <label class="choice-label">
+              <input type="radio" name="question_${qIdx}" value="${cIdx}">
+              <span>${choiceText}</span>
+            </label>
+          `;
+        });
+
+        row.innerHTML = `
+          <strong>${qObj.prompt}</strong>
+          <div class="choices-list">${optionsMarkup}</div>
+          <div class="answer-note" id="note_${qIdx}"></div>
+        `;
+        fragment.appendChild(row);
+      });
+
+      wrapper.appendChild(fragment);
+    }
+
+    function gradeQuiz() {
+      let totalCorrect = 0;
+
+      questionsBank.forEach((qObj, qIdx) => {
+        const checkedInput = document.querySelector(`input[name="question_${qIdx}"]:checked`);
+        const noteEl = document.getElementById(`note_${qIdx}`);
+        const isRight = checkedInput && Number(checkedInput.value) === qObj.correctIndex;
+
+        if (isRight) {
+          totalCorrect++;
+          noteEl.className = 'answer-note is-valid';
+          noteEl.textContent = `✓ Corretto! ${qObj.note}`;
+        } else {
+          noteEl.className = 'answer-note is-invalid';
+          noteEl.textContent = `✗ Errato. ${qObj.note}`;
+        }
+      });
+
+      const summaryBox = document.getElementById('examSummary');
+      summaryBox.style.display = 'block';
+      summaryBox.textContent = `Risultato finale: hai risposto correttamente a ${totalCorrect} domande su ${questionsBank.length}!`;
+    }
+
+    function clearQuiz() {
+      for (const radio of document.querySelectorAll('#examWrapper input[type="radio"]')) {
+        radio.checked = false;
+      }
+      for (const note of document.querySelectorAll('.answer-note')) {
+        note.className = 'answer-note';
+        note.textContent = '';
+      }
+      document.getElementById('examSummary').style.display = 'none';
+    }
+
+    // --- 3. GESTIONE GLOSSARIO ---
+    const dictionaryTerms = [
+      { word: "Browser", meaning: "Applicazione client (es. Chrome, Firefox, Safari) che richiede e visualizza le pagine web." },
+      { word: "Client", meaning: "Dispositivo o programma che avvia una richiesta verso un server." },
+      { word: "DNS (Domain Name System)", meaning: "Sistema gerarchico che traduce i nomi di dominio in indirizzi IP." },
+      { word: "HTTP", meaning: "Protocollo applicativo per il trasferimento di ipertesti e risorse sul Web." },
+      { word: "HTTPS", meaning: "Versione sicura di HTTP che utilizza la crittografia TLS." },
+      { word: "IMAP", meaning: "Protocollo per accedere e sincronizzare le email direttamente sul server di posta." },
+      { word: "Indirizzo IP", meaning: "Codice numerico che identifica univocamente un dispositivo collegato a una rete." },
+      { word: "Server", meaning: "Computer o software che ospita risorse e risponde alle richieste dei client." },
+      { word: "SMTP", meaning: "Protocollo standard per l'invio e l'inoltro di messaggi di posta elettronica." },
+      { word: "Status Code", meaning: "Codice numerico a 3 cifre inviato dal server per indicare l'esito di una richiesta HTTP." },
+      { word: "TCP/IP", meaning: "Insieme dei protocolli fondamentali su cui si basa il funzionamento di Internet." },
+      { word: "TLS (Transport Layer Security)", meaning: "Protocollo crittografico che garantisce riservatezza e integrità dei dati su Internet." },
+      { word: "URL", meaning: "Uniform Resource Locator: l'indirizzo completo che identifica una risorsa sul Web." }
+    ];
+
+    function updateDictionary(searchTerm = '') {
+      const container = document.getElementById('dictContainer');
+      const keyword = searchTerm.toLowerCase().trim();
+
+      const matches = dictionaryTerms.filter(item =>
+        item.word.toLowerCase().includes(keyword) || item.meaning.toLowerCase().includes(keyword)
+      );
+
+      if (!matches.length) {
+        container.innerHTML = '<p style="color:var(--muted);">Nessun termine trovato.</p>';
+        return;
+      }
+
+      container.innerHTML = matches.map(item => `
+        <div class="dict-entry">
+          <strong>${item.word}</strong>
+          <p>${item.meaning}</p>
+        </div>
+      `).join('');
+    }
+
+    // Inizializzazione componenti
+    buildFlashcards();
+    buildQuiz();
+    updateDictionary();
+
+    document.getElementById('btnSubmitExam').addEventListener('click', gradeQuiz);
+    document.getElementById('btnResetExam').addEventListener('click', clearQuiz);
+    document.getElementById('termFilter').addEventListener('input', (evt) => updateDictionary(evt.target.value));
+  </script>
+</body>
+</html>
