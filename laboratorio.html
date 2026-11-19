@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2. Laboratorio Interattivo – Come funziona il Web</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --bg-terminal: #0f172a;
+      --bg-panel: #f8fafc;
+    }
+
+    .lab-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1.2rem 0;
+    }
+
+    .form-control {
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background-color: var(--surface);
+      color: var(--text);
+    }
+
+    .full-width {
+      width: 100%;
+      margin-top: 0.35rem;
+    }
+
+    .btn-neutral {
+      background-color: #475569;
+    }
+
+    .btn-neutral:hover {
+      background-color: #334155;
+    }
+
+    .btn:disabled {
+      background-color: #cbd5e1;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    /* Griglia topologia Simulatore 1 */
+    .topology-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.1rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .host-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 0.6rem;
+      background-color: var(--bg-panel);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .host-card.is-active {
+      border-color: var(--primary);
+      background-color: #dbeafe;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.15);
+    }
+
+    .host-card.is-failed {
+      border-color: var(--err);
+      background-color: #fee2e2;
+    }
+
+    .host-emoji {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.45rem;
+    }
+
+    .host-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .console-output {
+      background-color: var(--bg-terminal);
+      color: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 8px;
+      min-height: 115px;
+    }
+
+    .phase-tag {
+      display: inline-block;
+      background-color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Struttura Simulatore 2 */
+    .split-workspace {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 1.2rem;
+    }
+
+    .work-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      background-color: var(--bg-panel);
+    }
+
+    .field-group {
+      margin: 0.85rem 0;
+    }
+
+    .code-terminal {
+      background-color: var(--bg-terminal);
+      color: #e2e8f0;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-top: 0.8rem;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .http-badge {
+      display: inline-block;
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-success { background-color: var(--ok); }
+    .badge-warning { background-color: var(--warn); }
+    .badge-danger  { background-color: var(--err); }
+
+    .bottom-nav {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .topology-grid,
+      .split-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo">NetExplained</a>
+      <button class="menu-btn" id="burgerToggle" aria-label="Apri menu">☰</button>
+      <ul class="nav-links" id="mainMenu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="teoria.html">1. Teoria</a></li>
+        <li><a href="laboratorio.html" class="active">2. Laboratorio</a></li>
+        <li><a href="studio.html">3. Studio</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>2. Laboratorio Interattivo</h1>
+      <p>Sperimenta in prima persona cosa succede dietro le quinte durante una connessione web.</p>
+    </section>
+
+    <!-- PRIMO SIMULATORE -->
+    <article class="card lab-section">
+      <h2>Simulatore 1: Dal click alla pagina (DNS + HTTP/HTTPS)</h2>
+      <p>Scegli un indirizzo web da visitare e premi <strong>"Passo successivo"</strong> per seguire il viaggio dei messaggi tra il tuo Browser, il Server DNS e il Web Server.</p>
+
+      <div class="toolbar">
+        <label for="targetUrl"><strong>Indirizzo:</strong></label>
+        <select id="targetUrl" class="form-control">
+          <option value="https">https://www.scuola-digitale.it (Sito sicuro)</option>
+          <option value="http">http://vecchio-blog.it (Non cifrato)</option>
+          <option value="nxdomain">https://www.sito-inesistente.xyz (Dominio errato)</option>
+        </select>
+        <button class="btn" id="btnAdvance" style="margin-top:0;">Passo successivo →</button>
+        <button class="btn btn-neutral" id="btnClearSim" style="margin-top:0;">Reset</button>
+      </div>
+
+      <div class="topology-grid">
+        <div class="host-card" data-host="client">
+          <span class="host-emoji">💻</span>
+          <strong>Client (Browser)</strong>
+          <div class="host-subtitle">Il tuo dispositivo</div>
+        </div>
+        <div class="host-card" data-host="dns">
+          <span class="host-emoji">📖</span>
+          <strong>Resolver DNS</strong>
+          <div class="host-subtitle">Rubrica IP</div>
+        </div>
+        <div class="host-card" data-host="server">
+          <span class="host-emoji">🖥️</span>
+          <strong>Web Server</strong>
+          <div class="host-subtitle">Ospita il sito</div>
+        </div>
+      </div>
+
+      <div class="console-output" id="simConsole">
+        <span class="phase-tag">Pronto</span>
+        <p>Seleziona un URL dal menu qui sopra e clicca su <strong>"Passo successivo"</strong> per iniziare la simulazione.</p>
+      </div>
+    </article>
+
+    <!-- SECONDO SIMULATORE -->
+    <article class="card lab-section">
+      <h2>Simulatore 2: Costruttore di richieste HTTP</h2>
+      <p>Scegli un <strong>Metodo HTTP</strong> e una <strong>Risorsa</strong> sul server, poi invia la richiesta per osservare il messaggio HTTP e il codice di stato restituito.</p>
+
+      <div class="split-workspace">
+        <div class="work-box">
+          <h3>Client (La tua richiesta)</h3>
+          <div class="field-group">
+            <label for="httpVerb"><strong>Metodo:</strong></label>
+            <select id="httpVerb" class="form-control full-width">
+              <option value="GET">GET (Leggi risorsa)</option>
+              <option value="POST">POST (Invia dati)</option>
+              <option value="DELETE">DELETE (Elimina risorsa)</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="resourceUri"><strong>Percorso (Risorsa):</strong></label>
+            <select id="resourceUri" class="form-control full-width">
+              <option value="/index.html">/index.html (Pagina principale)</option>
+              <option value="/contatti">/contatti (Modulo invio messaggio)</option>
+              <option value="/area-riservata">/area-riservata (Cartella protetta)</option>
+              <option value="/pagina-fantasma">/pagina-fantasma (Non esiste)</option>
+              <option value="/crash-server">/crash-server (Simula guasto interno)</option>
+            </select>
+          </div>
+          <button class="btn" id="btnDispatch">Invia Richiesta HTTP →</button>
+
+          <div class="code-terminal" id="requestPreview">GET /index.html HTTP/1.1
+Host: www.esempio.it
+User-Agent: BrowserStudente/1.0</div>
+        </div>
+
+        <div class="work-box">
+          <h3>Server (La risposta)</h3>
+          <div id="serverOutput" style="margin-top:0.75rem;">
+            <span class="http-badge badge-success">200 OK</span>
+            <p><strong>Spiegazione:</strong> Il server ha trovato <code>/index.html</code> e ha inviato il codice della pagina al browser.</p>
+            <div class="code-terminal">HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+
+&lt;html&gt;&lt;body&gt;Benvenuto nella Home!&lt;/body&gt;&lt;/html&gt;</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <div class="bottom-nav">
+      <a href="teoria.html" class="btn btn-neutral">← Torna alla Teoria</a>
+      <a href="studio.html" class="btn">Prossimo step: Area Studio →</a>
+    </div>
+  </main>
+
+  <footer>
+    <p>Progetto didattico realizzato da <strong>DHANOA MACRINO MAFFEO</strong> – Pubblicato su GitHub Pages.</p>
+  </footer>
+
+  <script>
+    // Gestione navigazione mobile
+    const burgerBtn = document.getElementById('burgerToggle');
+    const navList = document.getElementById('mainMenu');
+    burgerBtn.addEventListener('click', () => navList.classList.toggle('open'));
+
+    // --- MOTORE SIMULATORE 1 ---
+    const simulationFlows = {
+      https: [
+        { target: 'client', title: 'Step 1 / 5 – Richiesta DNS', desc: 'Il Browser non sa dove si trova "www.scuola-digitale.it". Invia una query al Resolver DNS per chiedere l’indirizzo IP corrispondente.' },
+        { target: 'dns',    title: 'Step 2 / 5 – Risposta DNS', desc: 'Il Resolver DNS consulta la gerarchia dei nomi e risponde al Browser: "L’indirizzo IP del server è 93.184.216.34".' },
+        { target: 'server', title: 'Step 3 / 5 – Handshake TLS (Sicurezza)', desc: 'Poiché l’URL inizia con HTTPS, Browser e Server si scambiano i certificati digitali e concordano una chiave crittografica. Compare il lucchetto!' },
+        { target: 'client', title: 'Step 4 / 5 – Richiesta HTTP cifrata', desc: 'Il Browser invia il messaggio "GET / HTTP/1.1" all’interno del tunnel cifrato TLS verso l’IP 93.184.216.34.' },
+        { target: 'server', title: 'Step 5 / 5 – Risposta 200 OK', desc: 'Il Web Server decifra la richiesta, risponde con "200 OK" e invia i file HTML e CSS. Il Browser disegna la pagina sullo schermo.' }
+      ],
+      http: [
+        { target: 'client', title: 'Step 1 / 4 – Richiesta DNS', desc: 'Il Browser chiede al Resolver DNS qual è l’indirizzo IP di "vecchio-blog.it".' },
+        { target: 'dns',    title: 'Step 2 / 4 – Risposta DNS', desc: 'Il Resolver DNS risponde con l’indirizzo IP: 198.51.100.42.' },
+        { target: 'client', title: 'Step 3 / 4 – Richiesta HTTP IN CHIARO', desc: 'ATTENZIONE: Nessun passaggio TLS! Il Browser invia "GET / HTTP/1.1" in chiaro. Il browser mostra l’avviso "Non sicuro" perché i dati non sono cifrati.' },
+        { target: 'server', title: 'Step 4 / 4 – Risposta 200 OK', desc: 'Il Server invia la pagina web in chiaro. La pagina si carica, ma eventuali password inserite potrebbero essere intercettate sulla rete.' }
+      ],
+      nxdomain: [
+        { target: 'client', title: 'Step 1 / 2 – Richiesta DNS', desc: 'Il Browser chiede al Resolver DNS l’indirizzo IP di "www.sito-inesistente.xyz".' },
+        { target: 'dns',    title: 'Step 2 / 2 – Errore NXDOMAIN', isError: true, desc: 'ERRORE DNS (NXDOMAIN): Il dominio non esiste nella rubrica mondiale di Internet. La connessione si ferma qui: il Web Server non viene nemmeno contattato!' }
+      ]
+    };
+
+    let stepIndex = 0;
+    const urlDropdown = document.getElementById('targetUrl');
+    const advanceBtn = document.getElementById('btnAdvance');
+    const resetBtn = document.getElementById('btnClearSim');
+    const consoleBox = document.getElementById('simConsole');
+    const hostCards = document.querySelectorAll('.host-card');
+
+    function resetHostHighlights() {
+      for (const card of hostCards) {
+        card.classList.remove('is-active', 'is-failed');
+      }
+    }
+
+    function initializeSim1() {
+      stepIndex = 0;
+      resetHostHighlights();
+      advanceBtn.disabled = false;
+      consoleBox.innerHTML = `<span class="phase-tag">Pronto</span><p>Seleziona un URL dal menu qui sopra e clicca su <strong>"Passo successivo"</strong> per iniziare la simulazione.</p>`;
+    }
+
+    function executeNextStep() {
+      const activeFlow = simulationFlows[urlDropdown.value];
+      if (stepIndex >= activeFlow.length) return;
+
+      const stepData = activeFlow[stepIndex];
+      resetHostHighlights();
+
+      const targetCard = document.querySelector(`.host-card[data-host="${stepData.target}"]`);
+      if (targetCard) {
+        targetCard.classList.add(stepData.isError ? 'is-failed' : 'is-active');
+      }
+
+      consoleBox.innerHTML = `<span class="phase-tag">${stepData.title}</span><p>${stepData.desc}</p>`;
+      stepIndex++;
+
+      if (stepIndex === activeFlow.length) {
+        advanceBtn.disabled = true;
+      }
+    }
+
+    advanceBtn.addEventListener('click', executeNextStep);
+    resetBtn.addEventListener('click', initializeSim1);
+    urlDropdown.addEventListener('change', initializeSim1);
+
+    // --- MOTORE SIMULATORE 2 ---
+    const verbSelect = document.getElementById('httpVerb');
+    const uriSelect = document.getElementById('resourceUri');
+    const reqTerminal = document.getElementById('requestPreview');
+    const resContainer = document.getElementById('serverOutput');
+    const dispatchBtn = document.getElementById('btnDispatch');
+
+    function refreshRequestBox() {
+      const verb = verbSelect.value;
+      const uri = uriSelect.value;
+      const payload = (verb === 'POST') 
+        ? '\nContent-Type: application/x-www-form-urlencoded\n\nnome=Mario&messaggio=Ciao' 
+        : '';
+
+      reqTerminal.textContent = `${verb} ${uri} HTTP/1.1\nHost: www.esempio.it\nUser-Agent: BrowserStudente/1.0${payload}`;
+    }
+
+    function evaluateHttpCall() {
+      refreshRequestBox();
+      const verb = verbSelect.value;
+      const uri = uriSelect.value;
+
+      let result = {
+        statusText: '200 OK',
+        badgeStyle: 'badge-success',
+        details: `Richiesta ${verb} su ${uri} completata con successo! Il server restituisce il contenuto della pagina.`,
+        rawPayload: `HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body>Contenuto di ${uri}</body></html>`
+      };
+
+      if (uri === '/crash-server') {
+        result = {
+          statusText: '500 Internal Server Error',
+          badgeStyle: 'badge-danger',
+          details: 'Il server ha riscontrato un errore interno imprevisto nel codice e non può completare la richiesta.',
+          rawPayload: 'HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\n\nErrore interno del server.'
+        };
+      } else if (uri === '/pagina-fantasma') {
+        result = {
+          statusText: '404 Not Found',
+          badgeStyle: 'badge-warning',
+          details: 'La risorsa richiesta non esiste sul server. Controlla di aver digitato correttamente l’URL.',
+          rawPayload: 'HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n<h1>404 - Pagina non trovata</h1>'
+        };
+      } else if (uri === '/area-riservata') {
+        result = {
+          statusText: '403 Forbidden',
+          badgeStyle: 'badge-danger',
+          details: 'Il server ha capito la richiesta, ma ti nega l’accesso perché non hai i permessi di amministratore.',
+          rawPayload: 'HTTP/1.1 403 Forbidden\nContent-Type: text/plain\n\nAccesso negato a questa cartella.'
+        };
+      } else if (verb === 'DELETE') {
+        result = {
+          statusText: '405 Method Not Allowed',
+          badgeStyle: 'badge-warning',
+          details: 'Il server non permette a un utente normale di cancellare file con il metodo DELETE!',
+          rawPayload: 'HTTP/1.1 405 Method Not Allowed\nAllow: GET, POST'
+        };
+      } else if (uri === '/contatti' && verb === 'POST') {
+        result = {
+          statusText: '201 Created',
+          badgeStyle: 'badge-success',
+          details: 'I dati del modulo sono stati inviati con successo tramite POST e il server ha salvato il nuovo messaggio.',
+          rawPayload: 'HTTP/1.1 201 Created\nContent-Type: application/json\n\n{"stato": "Messaggio ricevuto"}'
+        };
+      }
+
+      resContainer.innerHTML = `
+        <span class="http-badge ${result.badgeStyle}">${result.statusText}</span>
+        <p><strong>Spiegazione:</strong> ${result.details}</p>
+        <div class="code-terminal">${result.rawPayload}</div>
+      `;
+    }
+
+    verbSelect.addEventListener('change', refreshRequestBox);
+    uriSelect.addEventListener('change', refreshRequestBox);
+    dispatchBtn.addEventListener('click', evaluateHttpCall);
+  </script>
+</body>
+</html>
